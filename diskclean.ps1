@@ -7,7 +7,7 @@ $diskSpace = [ScriptBlock]::Create({
     Write-Host "Free Disk Space: $free GB"
 })
 
-#Specify what to clean via registry values
+# Specify what to clean via registry values
 $regSage = [ScriptBlock]::Create({
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Active Setup Temp Folders' -Name StateFlags0420 -Value 2
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Internet Cache Files' -Name StateFlags0420 -Value 2
@@ -26,3 +26,10 @@ Write-Host "Running disk cleanup, this might take a while, please wait..." -Fore
 Start-Process cleanmgr.exe -ArgumentList "/sagerun:0420" -Wait
 
 Invoke-Command -ScriptBlock $diskSpace
+
+# Remove the previously created registry values
+$volumeCaches = Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches"
+foreach($key in $volumeCaches)
+{
+    Remove-ItemProperty -Path "$($key.PSPath)" -Name StateFlags0420 -Force | Out-Null
+}

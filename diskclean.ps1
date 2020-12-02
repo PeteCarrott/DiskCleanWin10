@@ -17,6 +17,12 @@ $regSage = [ScriptBlock]::Create({
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\Windows Upgrade Log Files' -Name StateFlags0420 -Value 2
 })
 
+# Clear registry values after 
+$volumeCaches = Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches"
+foreach($key in $volumeCaches)
+{
+    Remove-ItemProperty -Path "$($key.PSPath)" -Name StateFlags0420 -Force | Out-Null
+}
 
 Invoke-Command -ScriptBlock $diskSpace
 Invoke-Command -ScriptBlock $regSage
@@ -27,9 +33,4 @@ Start-Process cleanmgr.exe -ArgumentList "/sagerun:0420" -Wait
 
 Invoke-Command -ScriptBlock $diskSpace
 
-# Remove the previously created registry values
-$volumeCaches = Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches"
-foreach($key in $volumeCaches)
-{
-    Remove-ItemProperty -Path "$($key.PSPath)" -Name StateFlags0420 -Force | Out-Null
-}
+
